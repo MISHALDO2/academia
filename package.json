@@ -1,0 +1,24 @@
+{
+  "name": "academia",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MISHALDO2/academia.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/MISHALDO2/academia/issues"
+  },
+  "homepage": "https://github.com/MISHALDO2/academia#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
