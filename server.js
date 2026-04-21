@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 
 app.use(express.json());
+app.use(express.static('.')); // Añadido para servir archivos HTML y CSS desde el directorio raíz
 
 app.get('/api/test', (req, res) => {
   res.json({ mensaje: "Backend funcionando" });
