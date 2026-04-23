@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 
 // Sirve el frontend desde /public
-app.use(express.static('public'));
+app.use(express.static('.'));
 app.use('/api/cursos', cursosRoutes);
 
 // Endpoint de prueba
