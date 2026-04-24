@@ -7,7 +7,7 @@ const usersRoutes = require('./routes/users');
 
 // Middlewares
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('.'));
 
 // Rutas
 app.use('/api/cursos', cursosRoutes);
