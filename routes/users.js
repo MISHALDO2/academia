@@ -6,6 +6,15 @@ const db = require('../database');
 router.post('/register', (req, res) => {
   const { email, password } = req.body;
 
+  // VALIDACIONES
+  if (!email || !password) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  if (password.length < 4) {
+    return res.status(400).json({ error: "La contraseña es muy corta" });
+  }
+
   const query = `INSERT INTO users (email, password) VALUES (?, ?)`;
 
   db.run(query, [email, password], function (err) {
@@ -24,6 +33,11 @@ router.post('/register', (req, res) => {
 // LOGIN
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
+
+  // VALIDACIONES
+  if (!email || !password) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
 
   const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
 
