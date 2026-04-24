@@ -1,29 +1,25 @@
-const cursosRoutes = require('./routes/cursos');
 const express = require('express');
 const app = express();
 
-// Permite usar JSON
+const cursosRoutes = require('./routes/cursos');
+const chatRoutes = require('./routes/chat');
+const usersRoutes = require('./routes/users');
+
+// Middlewares
 app.use(express.json());
-
-// Sirve el frontend desde /public
 app.use(express.static('public'));
-app.use('/api/cursos', cursosRoutes);
 
-// Endpoint de prueba
+// Rutas
+app.use('/api/cursos', cursosRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/users', usersRoutes);
+
+// Test
 app.get('/api/test', (req, res) => {
   res.json({ mensaje: "Backend funcionando" });
 });
 
-// Endpoint del chatbot
-app.post('/api/chat', (req, res) => {
-  const { mensaje } = req.body;
-
-  res.json({
-    respuesta: "Respuesta simulada del chatbot: " + mensaje
-  });
-});
-
-// Arrancar servidor
+// Servidor
 app.listen(3000, () => {
   console.log("Servidor en http://localhost:3000");
 });
