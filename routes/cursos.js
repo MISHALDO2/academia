@@ -8,28 +8,28 @@ router.get('/', (req, res) => {
       titulo: "Curso JavaScript",
       progreso: 30,
       descripcion: "Aprende JavaScript desde cero",
-      imagen: "https://via.placeholder.com/150"
+      imagen: "public/assets/img/JavaScript.png"
     },
     {
       id: 2,
       titulo: "Curso HTML",
       progreso: 80,
       descripcion: "Domina HTML",
-      imagen: "https://via.placeholder.com/150"
+      imagen: "public/assets/img/HTML.png"
     },
     {
       id: 3,
       titulo: "Curso CSS",
       progreso: 50,
       descripcion: "Aprende CSS moderno",
-      imagen: "https://via.placeholder.com/150"
+      imagen: "public/assets/img/CSS.png"
     },
     {
       id: 99,
       titulo: "CURSO NUEVO PRUEBA",
       progreso: 10,
       descripcion: "test",
-      imagen: "https://via.placeholder.com/150"
+      imagen: ""
     }
   ]);
 });
