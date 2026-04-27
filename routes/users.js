@@ -6,7 +6,6 @@ const db = require('../database');
 router.post('/register', (req, res) => {
   const { email, password } = req.body;
 
-  // VALIDACIONES
   if (!email || !password) {
     return res.status(400).json({ error: "Faltan datos" });
   }
@@ -30,11 +29,10 @@ router.post('/register', (req, res) => {
   });
 });
 
-// LOGIN
+// LOGIN CON SESIÓN
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  // VALIDACIONES
   if (!email || !password) {
     return res.status(400).json({ error: "Faltan datos" });
   }
@@ -50,13 +48,34 @@ router.post('/login', (req, res) => {
       return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
     }
 
+    //  GUARDAMOS SESIÓN
+    req.session.user = {
+      id: row.id,
+      email: row.email
+    };
+
     res.json({
       mensaje: "Login correcto",
-      usuario: {
-        id: row.id,
-        email: row.email
-      }
+      usuario: req.session.user
     });
+  });
+});
+
+//  VER USUARIO ACTUAL
+router.get('/me', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "No autenticado" });
+  }
+
+  res.json({
+    usuario: req.session.user
+  });
+});
+
+//  LOGOUT
+router.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ mensaje: "Logout correcto" });
   });
 });
 

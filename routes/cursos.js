@@ -1,37 +1,18 @@
 const express = require('express');
 const router = express.Router();
+const db = require('../database');
 
+// GET cursos desde base de datos
 router.get('/', (req, res) => {
-  res.json([
-    {
-      id: 1,
-      titulo: "Curso JavaScript",
-      progreso: 30,
-      descripcion: "Aprende JavaScript desde cero",
-      imagen: "public/assets/img/JavaScript.png"
-    },
-    {
-      id: 2,
-      titulo: "Curso HTML",
-      progreso: 80,
-      descripcion: "Domina HTML",
-      imagen: "public/assets/img/HTML.png"
-    },
-    {
-      id: 3,
-      titulo: "Curso CSS",
-      progreso: 50,
-      descripcion: "Aprende CSS moderno",
-      imagen: "public/assets/img/CSS.png"
-    },
-    {
-      id: 99,
-      titulo: "CURSO NUEVO PRUEBA",
-      progreso: 10,
-      descripcion: "test",
-      imagen: ""
+  const query = `SELECT * FROM courses`;
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener cursos" });
     }
-  ]);
+
+    res.json(rows);
+  });
 });
 
 module.exports = router;
