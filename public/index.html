@@ -494,36 +494,15 @@
             
             <h2 style="font-weight: 900; margin-bottom: 8px;">Comienza tu carrera</h2>
             <p style="color: #64748b; margin-bottom: 25px; font-size: 0.9rem;">Únete a +500 estudiantes en la plataforma.</p>
-            
             <form id="regForm">
                 <div class="form-group">
-                    <label>Nombre completo</label>
-                    <input type="text" placeholder="Ej. Juan Pérez" required>
-                </div>
-
-                <div class="form-group">
                     <label>Email</label>
-                    <input type="email" placeholder="tu@email.com" required>
-                </div>
-
-                <div class="form-group">
-                    <label>¿Qué te gustaría aprender?</label>
-                    <select class="form-select" required>
-                        <option value="" disabled selected>Selecciona un área</option>
-                        <option value="dev">Desarrollo Web</option>
-                        <option value="design">Diseño UI/UX</option>
-                        <option value="marketing">Marketing Digital</option>
-                        <option value="data">Inteligencia Artificial</option>
-                        <option value="business">Negocios Online</option>
-                        <option value="data">Data Science</option>
-                        <option value="cyber">Ciberseguridad</option>
-                        <option value="video">Edición de Vídeo</option>
-                    </select>
+                    <input type="email" name="email" id="regEmail" placeholder="tu@email.com" required>
                 </div>
 
                 <div class="form-group">
                     <label>Contraseña</label>
-                    <input type="password" placeholder="********" required>
+                    <input type="password" name="password" id="regPassword" placeholder="********" required>
                 </div>
 
                 <div class="form-checkbox">
@@ -532,7 +511,7 @@
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    Unirse
+                    Unirse ahora
                 </button>
             </form>
         </div>
@@ -627,6 +606,35 @@
             
             container.scrollTop = container.scrollHeight;
         }
+
+        document.getElementById('regForm').onsubmit = async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch('/api/users/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('¡Bienvenido! ' + data.mensaje);
+                    toggleModal();
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo completar el registro'));
+                }
+            } catch (error) {
+                console.error("Error de conexión:", error);
+                alert('No se pudo conectar con el servidor.');
+            }
+        };
     </script>
 </body>
 </html>
