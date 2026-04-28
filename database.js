@@ -45,4 +45,11 @@ db.run(`
   WHERE NOT EXISTS (SELECT 1 FROM courses WHERE titulo = 'Curso CSS')
 `);
 
+db.run(`
+  CREATE TABLE IF NOT EXISTS user_courses (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    course_id INTEGER
+  )
+`);
 module.exports = db;

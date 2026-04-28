@@ -78,5 +78,48 @@ router.post('/logout', (req, res) => {
     res.json({ mensaje: "Logout correcto" });
   });
 });
+// ASIGNAR CURSO A USUARIO
+router.post('/assign-course', (req, res) => {
+  const { user_id, course_id } = req.body;
+
+  if (!user_id || !course_id) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  const query = `
+    INSERT INTO user_courses (user_id, course_id)
+    VALUES (?, ?)
+  `;
+
+  db.run(query, [user_id, course_id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al asignar curso" });
+    }
+
+    res.json({
+      mensaje: "Curso asignado correctamente"
+    });
+  });
+});
+// OBTENER CURSOS DE UN USUARIO
+router.get('/my-courses/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT courses.*
+    FROM courses
+    JOIN user_courses 
+      ON courses.id = user_courses.course_id
+    WHERE user_courses.user_id = ?
+  `;
+
+  db.all(query, [userId], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener cursos del usuario" });
+    }
+
+    res.json(rows);
+  });
+});
 
 module.exports = router;
