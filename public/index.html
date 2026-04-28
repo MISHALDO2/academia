@@ -496,6 +496,10 @@
             <p style="color: #64748b; margin-bottom: 25px; font-size: 0.9rem;">Únete a +500 estudiantes en la plataforma.</p>
             <form id="regForm">
                 <div class="form-group">   
+                    <label>Nombre Completo</label>
+                    <input type="text" name="name" id="regName" placeholder="Tu nombre y apellidos" required>
+                </div>
+                <div class="form-group">   
                     <label>Email</label>
                     <input type="email" name="email" id="regEmail" placeholder="tu@email.com" required>
                 </div>
@@ -634,6 +638,8 @@
         document.getElementById('regForm').onsubmit = async function(e) {
             e.preventDefault();
             
+            // Capturamos los tres valores ahora
+            const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
 
@@ -643,13 +649,14 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password })
+                    // Enviamos "name" al servidor
+                    body: JSON.stringify({ name, email, password })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('¡Bienvenido! ' + data.mensaje);
+                    alert('¡Bienvenido! ' + (data.mensaje || 'Registro completado'));
                     toggleModal();
                 } else {
                     alert('Error: ' + (data.error || 'No se pudo completar el registro'));
@@ -659,7 +666,6 @@
                 alert('No se pudo conectar con el servidor.');
             }
         };
-
         function toggleLoginModal() {
             document.getElementById('loginModal').classList.toggle('active');
         }

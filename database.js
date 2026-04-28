@@ -12,6 +12,7 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
 db.run(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT,
     email TEXT,
     password TEXT,
     role TEXT DEFAULT 'user'

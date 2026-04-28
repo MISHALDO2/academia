@@ -4,26 +4,29 @@ const db = require('../database');
 
 // REGISTER
 router.post('/register', (req, res) => {
-  const { email, password } = req.body;
+  const { name, email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ error: "Faltan datos" });
+  if (!name || !email || !password) {
+    return res.status(400).json({ error: "Faltan datos (nombre, email o contraseña)" });
   }
 
   if (password.length < 4) {
     return res.status(400).json({ error: "La contraseña es muy corta" });
   }
+  const query = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
 
-  const query = `INSERT INTO users (email, password) VALUES (?, ?)`;
-
-  db.run(query, [email, password], function (err) {
+  db.run(query, [name, email, password], function (err) {
     if (err) {
+      if (err.message.includes("UNIQUE constraint failed")) {
+        return res.status(400).json({ error: "El email ya está registrado" });
+      }
       return res.status(500).json({ error: "Error al registrar usuario" });
     }
 
     res.json({
       mensaje: "Usuario registrado correctamente",
       id: this.lastID,
+      nombre: name,
       email
     });
   });
