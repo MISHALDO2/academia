@@ -4,41 +4,31 @@ const db = require('../database');
 
 // REGISTER
 router.post('/register', (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: "Faltan datos (nombre, email o contraseña)" });
-  }
-
-  if (password.length < 4) {
-    return res.status(400).json({ error: "La contraseña es muy corta" });
-  }
-  const query = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
-
-  db.run(query, [name, email, password], function (err) {
-    if (err) {
-      if (err.message.includes("UNIQUE constraint failed")) {
-        return res.status(400).json({ error: "El email ya está registrado" });
-      }
-      return res.status(500).json({ error: "Error al registrar usuario" });
-    }
-
-    res.json({
-      mensaje: "Usuario registrado correctamente",
-      id: this.lastID,
-      nombre: name,
-      email
-    });
-  });
-});
-
-// LOGIN CON SESIÓN
-router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: "Faltan datos" });
   }
+
+  const query = `INSERT INTO users (email, password, role) VALUES (?, ?, ?)`;
+
+  db.run(query, [email, password, 'user'], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al registrar usuario" });
+    }
+
+    res.json({
+      mensaje: "Usuario registrado",
+      id: this.lastID,
+      email,
+      role: 'user'
+    });
+  });
+});
+
+// LOGIN
+router.post('/login', (req, res) => {
+  const { email, password } = req.body;
 
   const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
 
@@ -48,13 +38,13 @@ router.post('/login', (req, res) => {
     }
 
     if (!row) {
-      return res.status(401).json({ error: "Usuario o contraseña incorrectos" });
+      return res.status(401).json({ error: "Credenciales incorrectas" });
     }
 
-    //  GUARDAMOS SESIÓN
     req.session.user = {
       id: row.id,
-      email: row.email
+      email: row.email,
+      role: row.role
     };
 
     res.json({
@@ -64,24 +54,23 @@ router.post('/login', (req, res) => {
   });
 });
 
-//  VER USUARIO ACTUAL
+// USUARIO ACTUAL
 router.get('/me', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "No autenticado" });
   }
 
-  res.json({
-    usuario: req.session.user
-  });
+  res.json(req.session.user);
 });
 
-//  LOGOUT
+// LOGOUT
 router.post('/logout', (req, res) => {
   req.session.destroy(() => {
     res.json({ mensaje: "Logout correcto" });
   });
 });
-// ASIGNAR CURSO A USUARIO
+
+// ASIGNAR CURSO
 router.post('/assign-course', (req, res) => {
   const { user_id, course_id } = req.body;
 
@@ -99,14 +88,17 @@ router.post('/assign-course', (req, res) => {
       return res.status(500).json({ error: "Error al asignar curso" });
     }
 
-    res.json({
-      mensaje: "Curso asignado correctamente"
-    });
+    res.json({ mensaje: "Curso asignado correctamente" });
   });
 });
-// OBTENER CURSOS DE UN USUARIO
-router.get('/my-courses/:userId', (req, res) => {
-  const { userId } = req.params;
+
+// CURSOS DEL USUARIO (SESIÓN)
+router.get('/my-courses', (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "No autenticado" });
+  }
+
+  const userId = req.session.user.id;
 
   const query = `
     SELECT courses.*
@@ -118,7 +110,7 @@ router.get('/my-courses/:userId', (req, res) => {
 
   db.all(query, [userId], (err, rows) => {
     if (err) {
-      return res.status(500).json({ error: "Error al obtener cursos del usuario" });
+      return res.status(500).json({ error: "Error al obtener cursos" });
     }
 
     res.json(rows);
