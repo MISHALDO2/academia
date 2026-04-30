@@ -233,17 +233,17 @@
             <a href="#" class="nav-link">Mis Certificados</a>
             <div class="user-pill">
                 <div style="text-align: right; line-height: 1.1;">
-                    <div style="font-size: 0.8rem; font-weight: 800;">Alumno</div>
+                    <div id="userNameNav" style="font-size: 0.8rem; font-weight: 800;">Alumno</div>
                     <div style="font-size: 0.65rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase;">Plan</div>
                 </div>
-                <div class="avatar">A</div>
+                <div id="userAvatar" class="avatar">A</div>
             </div>
         </div>
     </nav>
 
     <div class="dashboard-container">
         <header class="welcome-area">
-            <h1>Bienvenido de nuevo, Alumno</h1>
+            <h1>Bienvenido de nuevo, <span id="userNameWelcome">Alumno</span></h1>
         </header>
 
         <main>
@@ -359,7 +359,7 @@
                 const imagenHTML = curso.imagen 
                     ? `<img src="${rutaImagen}" alt="${curso.titulo}">` 
                     : `🎓`;
-                    
+
                 const progreso = curso.progreso || 0;
 
                 card.innerHTML = `
@@ -419,7 +419,35 @@
             );
             renderCursos(filtrados);
         });
+        async function cargarNombreUsuario() {
+            try {
+                const response = await fetch('/api/users/me');
+                
+                if (response.ok) {
+                    const usuario = await response.json();
+                    
+                    if (usuario.name) {
+                        const welcomeEl = document.getElementById('userNameWelcome');
+                        if(welcomeEl) welcomeEl.innerText = usuario.name;
+                        
+                        const navEl = document.getElementById('userNameNav');
+                        if(navEl) navEl.innerText = usuario.name;
 
+                        const avatarEl = document.getElementById('userAvatar');
+                        if(avatarEl) avatarEl.innerText = usuario.name.charAt(0).toUpperCase();
+                    }
+                } else {
+                    window.location.href = 'login.html'; 
+                }
+            } catch (error) {
+                console.error("Error al obtener datos del usuario:", error);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarNombreUsuario();
+            loadCourses();
+        });
         window.onload = loadCourses;
     </script>
 </body>
