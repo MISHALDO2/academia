@@ -319,20 +319,26 @@
 
         async function loadCourses() {
             try {
-                const response = await fetch('/api/cursos/');
-                todosLosCursos = await response.json(); 
+                const response = await fetch('/api/users/my-courses');
+                
+                if (!response.ok) {
+                    throw new Error("No se pudieron cargar tus cursos");
+                }
+
+                todosLosCursos = await response.json();
                 
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('courseCountText').innerText = `Tienes ${todosLosCursos.length} cursos disponibles`;
+                document.getElementById('courseCountText').innerText = 
+                    `Tienes ${todosLosCursos.length} cursos asignados a tu plan`;
                 
                 renderCursos(todosLosCursos);
                 actualizarRuedaReal();
 
             } catch (e) {
-                console.error("Error cargando cursos:", e);
+                console.error("Error cargando cursos personalizados:", e);
                 document.getElementById('loading').innerHTML = 
                     `<div style="color: #b91c1c; background: #fee2e2; padding: 15px; border-radius: 12px; font-size: 0.9rem;">
-                        ⚠️ Error: No se pudo conectar con la base de datos.
+                        ⚠️ Error: No se pudieron sincronizar tus cursos.
                     </div>`;
             }
         }

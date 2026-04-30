@@ -638,7 +638,6 @@
         document.getElementById('regForm').onsubmit = async function(e) {
             e.preventDefault();
             
-            // Capturamos los tres valores ahora
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
@@ -649,7 +648,6 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    // Enviamos "name" al servidor
                     body: JSON.stringify({ name, email, password })
                 });
 
