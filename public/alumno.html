@@ -319,7 +319,6 @@
 
         async function loadCourses() {
             try {
-                // Llamada a tu API de Express (app.use('/api/cursos', cursosRoutes);)
                 const response = await fetch('/api/cursos/');
                 todosLosCursos = await response.json(); 
                 
@@ -350,11 +349,9 @@
             cursosFiltrados.forEach((curso, index) => {
                 const card = document.createElement('a');
                 card.className = 'course-card';
-                card.href = "#"; // Aquí podrías poner curso.id para ir al detalle
+                card.href = "#";
                 card.style.animationDelay = `${index * 0.1}s`;
 
-                // AJUSTE DE IMAGEN: Si es una URL completa (http), se usa tal cual. 
-                // Si es un nombre de archivo, se le puede añadir una ruta base.
                 const rutaImagen = curso.imagen && curso.imagen.startsWith('http') 
                     ? curso.imagen 
                     : `/${curso.imagen}`;
@@ -362,9 +359,7 @@
                 const imagenHTML = curso.imagen 
                     ? `<img src="${rutaImagen}" alt="${curso.titulo}">` 
                     : `🎓`;
-
-                // PROGRESO: Como en tu tabla no hay columna 'progreso', 
-                // ponemos 0 por defecto para que no salga "undefined%"
+                    
                 const progreso = curso.progreso || 0;
 
                 card.innerHTML = `
