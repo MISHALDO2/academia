@@ -319,19 +319,21 @@
 
         async function loadCourses() {
             try {
-                const response = await fetch('/api/cursos');
+                // Llamada a tu API de Express (app.use('/api/cursos', cursosRoutes);)
+                const response = await fetch('/api/cursos/');
                 todosLosCursos = await response.json(); 
                 
                 document.getElementById('loading').style.display = 'none';
-                document.getElementById('courseCountText').innerText = `Tienes ${todosLosCursos.length} cursos en progreso`;
+                document.getElementById('courseCountText').innerText = `Tienes ${todosLosCursos.length} cursos disponibles`;
                 
                 renderCursos(todosLosCursos);
                 actualizarRuedaReal();
 
             } catch (e) {
+                console.error("Error cargando cursos:", e);
                 document.getElementById('loading').innerHTML = 
                     `<div style="color: #b91c1c; background: #fee2e2; padding: 15px; border-radius: 12px; font-size: 0.9rem;">
-                        ⚠️ Error: El servidor no responde.
+                        ⚠️ Error: No se pudo conectar con la base de datos.
                     </div>`;
             }
         }
@@ -348,12 +350,22 @@
             cursosFiltrados.forEach((curso, index) => {
                 const card = document.createElement('a');
                 card.className = 'course-card';
-                card.href = "#";
+                card.href = "#"; // Aquí podrías poner curso.id para ir al detalle
                 card.style.animationDelay = `${index * 0.1}s`;
 
+                // AJUSTE DE IMAGEN: Si es una URL completa (http), se usa tal cual. 
+                // Si es un nombre de archivo, se le puede añadir una ruta base.
+                const rutaImagen = curso.imagen && curso.imagen.startsWith('http') 
+                    ? curso.imagen 
+                    : `/${curso.imagen}`;
+
                 const imagenHTML = curso.imagen 
-                    ? `<img src="/${curso.imagen}" alt="${curso.titulo}">` 
+                    ? `<img src="${rutaImagen}" alt="${curso.titulo}">` 
                     : `🎓`;
+
+                // PROGRESO: Como en tu tabla no hay columna 'progreso', 
+                // ponemos 0 por defecto para que no salga "undefined%"
+                const progreso = curso.progreso || 0;
 
                 card.innerHTML = `
                     <div class="icon-box">
@@ -361,9 +373,10 @@
                     </div>
                     <div class="course-details">
                         <h3>${curso.titulo}</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px;">${curso.descripcion || ''}</p>
                         <div class="prog-container">
-                            <div class="prog-bar"><div class="prog-fill" style="width: ${curso.progreso}%"></div></div>
-                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--primary); min-width: 35px;">${curso.progreso}%</span>
+                            <div class="prog-bar"><div class="prog-fill" style="width: ${progreso}%"></div></div>
+                            <span style="font-size: 0.8rem; font-weight: 800; color: var(--primary); min-width: 35px;">${progreso}%</span>
                         </div>
                     </div>
                     <div style="color: #cbd5e1; font-weight: bold;">›</div>

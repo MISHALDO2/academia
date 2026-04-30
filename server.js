@@ -9,6 +9,7 @@ const usersRoutes = require('./routes/users');
 // Middlewares
 app.use(express.json());
 app.use(express.static('.'));
+app.use(express.static('public'));
 
 // SESIONES
 app.use(session({
