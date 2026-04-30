@@ -35,22 +35,18 @@ router.post('/register', (req, res) => {
 // LOGIN
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-
   const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
 
   db.get(query, [email, password], (err, row) => {
-    if (err) {
-      return res.status(500).json({ error: "Error en login" });
-    }
+    if (err) return res.status(500).json({ error: "Error en login" });
+    if (!row) return res.status(401).json({ error: "Credenciales incorrectas" });
 
-    if (!row) {
-      return res.status(401).json({ error: "Credenciales incorrectas" });
-    }
-
+    // AGREGAR 'name: row.name' AQUÍ
     req.session.user = {
       id: row.id,
       email: row.email,
-      role: row.role
+      role: row.role,
+      name: row.name 
     };
 
     res.json({
