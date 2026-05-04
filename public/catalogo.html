@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo | WoWcademy</title>
+    <title>Catálogo | WoWacademy</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -220,7 +220,7 @@
 <body>
 
     <nav>
-        <a href="#" class="nav-logo"><span>WoW</span>cademy</a>
+        <a href="#" class="nav-logo"><span>WoW</span>academy</a>
         <a href="index.html" class="nav-back">← Volver al inicio</a>
     </nav>
 
@@ -241,7 +241,6 @@
     </div>
 
     <script>
-        // LA LÓGICA PERMANECE IGUAL
         let todosLosCursos = [];
 
         async function fetchPublicCourses() {
@@ -271,7 +270,7 @@
                 card.className = 'course-card';
                 card.innerHTML = `
                     <div class="image-box">
-                        <img src="${rutaImagen}" alt="${curso.titulo}" onerror="this.src='https://via.placeholder.com/400x220?text=WoWcademy'">
+                        <img src="${rutaImagen}" alt="${curso.titulo}" onerror="this.src='https://via.placeholder.com/400x220?text=WoWacademy'">
                     </div>
                     <div class="course-content">
                         <span class="badge">Certificación Oficial</span>
