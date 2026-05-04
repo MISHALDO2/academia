@@ -443,7 +443,7 @@
                         if(avatarEl) avatarEl.innerText = usuario.name.charAt(0).toUpperCase();
                     }
                 } else {
-                    window.location.href = 'login.html'; 
+                    console.error("No se pudo obtener la información del usuario.");
                 }
             } catch (error) {
                 console.error("Error al obtener datos del usuario:", error);
