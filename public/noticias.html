@@ -1,1 +1,232 @@
-NOTICIAS DE LA PLATAFORMA, AQUI SE PUEDE AÑADIR UN ENDPOINT PARA PONERLAS.
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noticias y Avisos | WoWacademy</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --primary-light: #4caf50;
+            --primary-soft: #f0fdf4;
+            --dark: #0f172a;
+            --text-muted: #64748b;
+            --bg-gradient-start: #e8f5e9; 
+            --bg-gradient-middle: #f1f8e9;
+            --bg-body: #f8fafc;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            --radius-lg: 20px;
+            --radius-md: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body { 
+            font-family: 'Inter', sans-serif;
+            /* Aplicando el gradiente de alumno.html */
+            background: linear-gradient(135deg, 
+                var(--bg-gradient-start) 0%, 
+                var(--bg-gradient-middle) 35%, 
+                var(--bg-body) 70%
+            );
+            background-attachment: fixed;
+            color: var(--dark); 
+            min-height: 100vh;
+        }
+
+        /* NAVEGACIÓN */
+        nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            padding: 12px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-logo { font-weight: 800; font-size: 1.4rem; text-decoration: none; color: var(--dark); letter-spacing: -0.5px; }
+        .nav-logo span { color: var(--primary); }
+        .nav-back { 
+            text-decoration: none; 
+            color: var(--primary); 
+            font-weight: 700; 
+            font-size: 0.85rem; 
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: var(--white);
+            box-shadow: var(--shadow-sm);
+            transition: 0.3s;
+        }
+        .nav-back:hover { transform: translateX(-5px); box-shadow: var(--shadow-md); }
+
+        /* CONTENEDOR PRINCIPAL */
+        .container {
+            max-width: 800px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        header.page-header {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        header.page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        header.page-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        /* LISTA DE NOTICIAS */
+        .news-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .news-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius-lg);
+            padding: 35px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--primary-light);
+        }
+
+        .news-meta {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            padding: 5px 14px;
+            border-radius: 8px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tag-nuevo { background: #dcfce7; color: #166534; }
+        .tag-evento { background: #e0f2fe; color: #0369a1; }
+        .tag-mantenimiento { background: #fee2e2; color: #991b1b; }
+
+        .news-date {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .news-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .news-card p {
+            font-size: 1rem;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 25px;
+        }
+
+        .read-more {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+
+        .read-more:hover {
+            gap: 12px;
+            color: var(--primary-light);
+        }
+
+        @media (max-width: 600px) {
+            header.page-header h1 { font-size: 1.8rem; }
+            .news-card { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo"><span>WoW</span>academy</a>
+        <a href="alumno.html" class="nav-back">← Volver al Panel</a>
+    </nav>
+
+    <div class="container">
+        <header class="page-header">
+            <h1>Noticias y Avisos</h1>
+            <p>Mantente al día con las últimas actualizaciones y eventos de la academia.</p>
+        </header>
+
+        <main class="news-feed">
+            <article class="news-card">
+                <div class="news-meta">
+                    <span class="tag tag-nuevo">Novedad</span>
+                    <span class="news-date">Hace 2 horas</span>
+                </div>
+                <h2>Nuevos laboratorios de React Avanzado disponibles</h2>
+                <p>Hemos actualizado el módulo 4 con 5 nuevos ejercicios prácticos centrados en optimización con UseMemo y Web Workers. ¡Entra ya y pon a prueba tus habilidades!</p>
+                <a href="#" class="read-more">Ver detalles de la lección →</a>
+            </article>
+
+            <article class="news-card">
+                <div class="news-meta">
+                    <span class="tag tag-evento">Evento en vivo</span>
+                    <span class="news-date">Mañana a las 18:00</span>
+                </div>
+                <h2>Sesión Q&A: Especialización en UX/UI</h2>
+                <p>Conéctate en vivo con nuestros mentores para resolver dudas sobre el diseño de interfaces y cómo preparar tu portfolio para el mercado laboral actual.</p>
+                <a href="#" class="read-more">Reservar mi plaza en Zoom →</a>
+            </article>
+            
+            <article class="news-card">
+                <div class="news-meta">
+                    <span class="tag tag-mantenimiento">Aviso Técnico</span>
+                    <span class="news-date">15 de Mayo, 2026</span>
+                </div>
+                <h2>Mantenimiento programado de la plataforma</h2>
+                <p>El próximo domingo realizaremos tareas de optimización en nuestros servidores. El acceso podría verse interrumpido brevemente entre las 02:00 y las 04:00 AM CEST.</p>
+            </article>
+        </main>
+    </div>
+
+    <footer style="margin-top: 80px; padding: 60px; text-align: center; background: rgba(255,255,255,0.3); backdrop-filter: blur(5px);">
+        <p style="color: var(--text-muted); font-size: 0.85rem; font-weight: 600;">© 2026 WoWacademy by Win O Win. Todos los derechos reservados.</p>
+    </footer>
+
+</body>
+</html>
