@@ -1,9 +1,9 @@
-const adminMiddleware = require('./middlewares/admin');
 const express = require('express');
 const router = express.Router();
 const db = require('../database');
+const adminMiddleware = require('./middlewares/admin');
 
-// GET cursos desde base de datos
+// OBTENER TODOS LOS CURSOS
 router.get('/', (req, res) => {
   const query = `SELECT * FROM courses`;
 
@@ -15,7 +15,8 @@ router.get('/', (req, res) => {
     res.json(rows);
   });
 });
-// CREAR CURSO
+
+// CREAR CURSO (solo admin)
 router.post('/', adminMiddleware, (req, res) => {
   const { titulo, descripcion, imagen } = req.body;
 
@@ -39,8 +40,20 @@ router.post('/', adminMiddleware, (req, res) => {
     });
   });
 });
-// tu código...
 
+// ELIMINAR CURSO (solo admin)
+router.delete('/:id', adminMiddleware, (req, res) => {
+  const { id } = req.params;
 
+  const query = `DELETE FROM courses WHERE id = ?`;
+
+  db.run(query, [id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al eliminar curso" });
+    }
+
+    res.json({ mensaje: "Curso eliminado" });
+  });
+});
 
 module.exports = router;
