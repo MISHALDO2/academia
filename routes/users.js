@@ -4,56 +4,54 @@ const db = require('../database');
 
 // REGISTER
 router.post('/register', (req, res) => {
-  const { name, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: "Faltan datos (nombre, email o contraseña)" });
+  if (!email || !password) {
+    return res.status(400).json({ error: "Faltan datos" });
   }
 
-  if (password.length < 4) {
-    return res.status(400).json({ error: "La contraseña es muy corta" });
-  }
-  const query = `INSERT INTO users (name, email, password) VALUES (?, ?, ?)`;
+  db.run(
+    `INSERT INTO users (email, password, role) VALUES (?, ?, ?)`,
+    [email, password, 'user'],
+    function (err) {
+      if (err) return res.status(500).json({ error: "Error al registrar usuario" });
 
-  db.run(query, [name, email, password], function (err) {
-    if (err) {
-      if (err.message.includes("UNIQUE constraint failed")) {
-        return res.status(400).json({ error: "El email ya está registrado" });
-      }
-      return res.status(500).json({ error: "Error al registrar usuario" });
+      res.json({
+        mensaje: "Usuario registrado",
+        id: this.lastID,
+        email,
+        role: 'user'
+      });
     }
-
-    res.json({
-      mensaje: "Usuario registrado correctamente",
-      id: this.lastID,
-      nombre: name,
-      email
-    });
-  });
+  );
 });
 
 // LOGIN
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const query = `SELECT * FROM users WHERE email = ? AND password = ?`;
 
-  db.get(query, [email, password], (err, row) => {
-    if (err) return res.status(500).json({ error: "Error en login" });
-    if (!row) return res.status(401).json({ error: "Credenciales incorrectas" });
+  db.get(
+    `SELECT * FROM users WHERE email = ? AND password = ?`,
+    [email, password],
+    (err, row) => {
+      if (err) return res.status(500).json({ error: "Error en login" });
 
-    // AGREGAR 'name: row.name' AQUÍ
-    req.session.user = {
-      id: row.id,
-      email: row.email,
-      role: row.role,
-      name: row.name 
-    };
+      if (!row) {
+        return res.status(401).json({ error: "Credenciales incorrectas" });
+      }
 
-    res.json({
-      mensaje: "Login correcto",
-      usuario: req.session.user
-    });
-  });
+      req.session.user = {
+        id: row.id,
+        email: row.email,
+        role: row.role
+      };
+
+      res.json({
+        mensaje: "Login correcto",
+        usuario: req.session.user
+      });
+    }
+  );
 });
 
 // USUARIO ACTUAL
@@ -80,21 +78,41 @@ router.post('/assign-course', (req, res) => {
     return res.status(400).json({ error: "Faltan datos" });
   }
 
-  const query = `
-    INSERT INTO user_courses (user_id, course_id)
-    VALUES (?, ?)
-  `;
+  db.run(
+    `INSERT INTO user_courses (user_id, course_id) VALUES (?, ?)`,
+    [user_id, course_id],
+    function (err) {
+      if (err) return res.status(500).json({ error: "Error al asignar curso" });
 
-  db.run(query, [user_id, course_id], function (err) {
-    if (err) {
-      return res.status(500).json({ error: "Error al asignar curso" });
+      res.json({ mensaje: "Curso asignado correctamente" });
     }
-
-    res.json({ mensaje: "Curso asignado correctamente" });
-  });
+  );
 });
 
-// CURSOS DEL USUARIO (SESIÓN)
+// QUITAR CURSO A USUARIO
+router.delete('/remove-course', (req, res) => {
+  const { user_id, course_id } = req.body;
+
+  if (!user_id || !course_id) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  db.run(
+    `DELETE FROM user_courses WHERE user_id = ? AND course_id = ?`,
+    [user_id, course_id],
+    function (err) {
+      if (err) return res.status(500).json({ error: "Error al quitar curso" });
+
+      if (this.changes === 0) {
+        return res.status(404).json({ error: "Relación no encontrada" });
+      }
+
+      res.json({ mensaje: "Curso eliminado del usuario" });
+    }
+  );
+});
+
+// CURSOS DEL USUARIO
 router.get('/my-courses', (req, res) => {
   if (!req.session.user) {
     return res.status(401).json({ error: "No autenticado" });
@@ -102,20 +120,54 @@ router.get('/my-courses', (req, res) => {
 
   const userId = req.session.user.id;
 
-  const query = `
+  db.all(
+    `
     SELECT courses.*
     FROM courses
-    JOIN user_courses 
-      ON courses.id = user_courses.course_id
+    JOIN user_courses ON courses.id = user_courses.course_id
     WHERE user_courses.user_id = ?
+    `,
+    [userId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: "Error al obtener cursos" });
+
+      res.json(rows);
+    }
+  );
+});
+
+// TODOS LOS USUARIOS CON SUS CURSOS
+router.get('/with-courses', (req, res) => {
+  const query = `
+    SELECT users.id as user_id, users.email, courses.id as course_id, courses.titulo
+    FROM users
+    LEFT JOIN user_courses ON users.id = user_courses.user_id
+    LEFT JOIN courses ON courses.id = user_courses.course_id
   `;
 
-  db.all(query, [userId], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: "Error al obtener cursos" });
-    }
+  db.all(query, [], (err, rows) => {
+    if (err) return res.status(500).json({ error: "Error al obtener datos" });
 
-    res.json(rows);
+    const result = {};
+
+    rows.forEach(row => {
+      if (!result[row.user_id]) {
+        result[row.user_id] = {
+          id: row.user_id,
+          email: row.email,
+          courses: []
+        };
+      }
+
+      if (row.course_id) {
+        result[row.user_id].courses.push({
+          id: row.course_id,
+          titulo: row.titulo
+        });
+      }
+    });
+
+    res.json(Object.values(result));
   });
 });
 

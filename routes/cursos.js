@@ -3,80 +3,118 @@ const router = express.Router();
 const db = require('../database');
 const adminMiddleware = require('./middlewares/admin');
 
-// OBTENER TODOS LOS CURSOS
+// VALIDACIÓN
+function validarCurso(titulo, descripcion) {
+  if (!titulo || !descripcion) return "Faltan datos";
+  if (titulo.length < 3) return "El título es muy corto";
+  if (descripcion.length < 5) return "La descripción es muy corta";
+  return null;
+}
+
+// GET CURSOS COMPLETO
 router.get('/', (req, res) => {
-  const query = `SELECT * FROM courses`;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const search = req.query.search || "";
+  const sort = req.query.sort || "id";
+  const order = req.query.order === "desc" ? "DESC" : "ASC";
+  const offset = (page - 1) * limit;
 
-  db.all(query, [], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: "Error al obtener cursos" });
-    }
+  const validSortFields = ["id", "titulo"];
+  const sortField = validSortFields.includes(sort) ? sort : "id";
 
-    res.json(rows);
-  });
-});
+  const searchTerm = `%${search}%`;
 
-// CREAR CURSO (solo admin)
-router.post('/', adminMiddleware, (req, res) => {
-  const { titulo, descripcion, imagen } = req.body;
-
-  if (!titulo || !descripcion) {
-    return res.status(400).json({ error: "Faltan datos" });
-  }
-
-  const query = `
-    INSERT INTO courses (titulo, descripcion, imagen)
-    VALUES (?, ?, ?)
+  // 1. contar total
+  const countQuery = `
+    SELECT COUNT(*) as total
+    FROM courses
+    WHERE titulo LIKE ? OR descripcion LIKE ?
   `;
 
-  db.run(query, [titulo, descripcion, imagen], function (err) {
-    if (err) {
-      return res.status(500).json({ error: "Error al crear curso" });
-    }
+  db.get(countQuery, [searchTerm, searchTerm], (err, countResult) => {
+    if (err) return res.status(500).json({ error: "Error al contar cursos" });
 
-    res.json({
-      mensaje: "Curso creado",
-      id: this.lastID
+    const total = countResult.total;
+    const totalPages = Math.ceil(total / limit);
+
+    // 2. obtener datos
+    const dataQuery = `
+      SELECT * FROM courses
+      WHERE titulo LIKE ? OR descripcion LIKE ?
+      ORDER BY ${sortField} ${order}
+      LIMIT ? OFFSET ?
+    `;
+
+    db.all(dataQuery, [searchTerm, searchTerm, limit, offset], (err, rows) => {
+      if (err) return res.status(500).json({ error: "Error al obtener cursos" });
+
+      res.json({
+        page,
+        limit,
+        total,
+        totalPages,
+        data: rows
+      });
     });
   });
 });
 
-// EDITAR CURSO (solo admin)
+// CREAR
+router.post('/', adminMiddleware, (req, res) => {
+  const { titulo, descripcion, imagen } = req.body;
+
+  const error = validarCurso(titulo, descripcion);
+  if (error) return res.status(400).json({ error });
+
+  db.run(
+    `INSERT INTO courses (titulo, descripcion, imagen) VALUES (?, ?, ?)`,
+    [titulo, descripcion, imagen],
+    function (err) {
+      if (err) return res.status(500).json({ error: "Error al crear curso" });
+      res.json({ mensaje: "Curso creado", id: this.lastID });
+    }
+  );
+});
+
+// EDITAR
 router.put('/:id', adminMiddleware, (req, res) => {
   const { id } = req.params;
   const { titulo, descripcion, imagen } = req.body;
 
-  if (!titulo || !descripcion) {
-    return res.status(400).json({ error: "Faltan datos" });
-  }
+  const error = validarCurso(titulo, descripcion);
+  if (error) return res.status(400).json({ error });
 
-  const query = `
-    UPDATE courses
-    SET titulo = ?, descripcion = ?, imagen = ?
-    WHERE id = ?
-  `;
-
-  db.run(query, [titulo, descripcion, imagen, id], function (err) {
-    if (err) {
-      return res.status(500).json({ error: "Error al actualizar curso" });
+  db.run(
+    `UPDATE courses SET titulo = ?, descripcion = ?, imagen = ? WHERE id = ?`,
+    [titulo, descripcion, imagen, id],
+    function (err) {
+      if (err) return res.status(500).json({ error: "Error al actualizar curso" });
+      if (this.changes === 0) {
+        return res.status(404).json({ error: "Curso no encontrado" });
+      }
+      res.json({ mensaje: "Curso actualizado" });
     }
-
-    res.json({ mensaje: "Curso actualizado" });
-  });
+  );
 });
 
-// ELIMINAR CURSO (solo admin)
+// ELIMINAR
 router.delete('/:id', adminMiddleware, (req, res) => {
   const { id } = req.params;
 
-  const query = `DELETE FROM courses WHERE id = ?`;
+  db.get(`SELECT * FROM courses WHERE id = ?`, [id], (err, row) => {
+    if (err) return res.status(500).json({ error: "Error al buscar curso" });
+    if (!row) return res.status(404).json({ error: "Curso no encontrado" });
 
-  db.run(query, [id], function (err) {
-    if (err) {
-      return res.status(500).json({ error: "Error al eliminar curso" });
-    }
+    db.run(`DELETE FROM user_courses WHERE course_id = ?`, [id], (err) => {
+      if (err) return res.status(500).json({ error: "Error al eliminar relaciones" });
 
-    res.json({ mensaje: "Curso eliminado" });
+      db.run(`DELETE FROM courses WHERE id = ?`, [id], (err) => {
+        if (err) return res.status(500).json({ error: "Error al eliminar curso" });
+
+        res.json({ mensaje: "Curso eliminado correctamente" });
+      });
+    });
   });
 });
 

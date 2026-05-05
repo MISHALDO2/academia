@@ -1,34 +1,38 @@
 const express = require('express');
 const session = require('express-session');
+const path = require('path');
+
 const app = express();
+const PORT = 3000;
 
-const cursosRoutes = require('./routes/cursos');
-const chatRoutes = require('./routes/chat');
-const usersRoutes = require('./routes/users');
-
-// Middlewares
+// MIDDLEWARES
 app.use(express.json());
-app.use(express.static('.'));
-app.use(express.static('public'));
+app.use(express.urlencoded({ extended: true }));
 
-// SESIONES
 app.use(session({
-  secret: 'secreto_super_seguro',
+  secret: 'secreto',
   resave: false,
   saveUninitialized: true
 }));
 
-// Rutas
-app.use('/api/cursos', cursosRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/users', usersRoutes);
+// SERVIR FRONTEND
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Test
+// ROUTES
+const userRoutes = require('./routes/users');
+const cursosRoutes = require('./routes/cursos');
+const adminRoutes = require('./routes/admin');
+
+app.use('/api/users', userRoutes);
+app.use('/api/cursos', cursosRoutes);
+app.use('/api/admin', adminRoutes);
+
+// TEST
 app.get('/api/test', (req, res) => {
-  res.json({ mensaje: "Backend funcionando" });
+  res.json({ mensaje: "Servidor funcionando" });
 });
 
-// Servidor
-app.listen(3000, () => {
-  console.log("Servidor en http://localhost:3000");
+// START
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
