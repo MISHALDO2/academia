@@ -630,7 +630,7 @@
             
             container.scrollTop = container.scrollHeight;
         }
-
+        // --- LÓGICA REGISTRO ---
         document.getElementById('regForm').onsubmit = async function(e) {
             e.preventDefault();
             
@@ -668,9 +668,10 @@
             if (e.target == document.getElementById('loginModal')) toggleLoginModal();
         });
 
+        // --- LÓGICA LOGIN ---
         document.getElementById('loginForm').onsubmit = async function(e) {
             e.preventDefault();
-            
+
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
 
@@ -684,39 +685,22 @@
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert('Sesión iniciada con éxito. ¡Hola de nuevo!');
-                    localStorage.setItem('userEmail', data.usuario.email);                
-                    window.location.href = 'alumno.html';
+                    localStorage.setItem('userEmail', data.usuario.email); 
+                    
+                    if (data.usuario.role === 'admin') {
+                        alert('Sesión iniciada con éxito. ¡Bienvenido, Administrador!');
+                        window.location.replace('admin.html');
+                    } else {
+                        alert('Sesión iniciada con éxito. ¡Hola de nuevo!');
+                        window.location.replace('alumno.html');
+                    }
+
                 } else {
                     alert('Error: ' + (data.error || 'Credenciales incorrectas'));
                 }
             } catch (error) {
                 console.error("Error en login:", error);
                 alert('No se pudo conectar con el servidor.');
-            }
-        };
-        document.getElementById('loginForm').onsubmit = async function(e) {
-            e.preventDefault();
-
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            try {
-                const response = await fetch('/api/users/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    localStorage.setItem('userEmail', data.usuario.email);
-                    window.location.replace('alumno.html'); 
-                } else {
-                    alert('Error en las credenciales');
-                }
-            } catch (error) {
-                console.error("Error:", error);
             }
         };
     </script>
