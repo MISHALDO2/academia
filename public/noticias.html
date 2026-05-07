@@ -64,7 +64,10 @@
             align-items: center;
             gap: 4px;
         }
-        .nav-logo span { color: var(--primary); }
+
+        .nav-logo span { 
+            color: var(--primary); 
+        }
         
         .nav-back { 
             text-decoration: none; 
@@ -77,6 +80,7 @@
             border-radius: 50px;
             transition: all 0.3s ease;
         }
+
         .nav-back:hover { 
             background: var(--primary);
             transform: scale(1.05);
@@ -182,10 +186,18 @@
 
         /* Ajustes para móviles */
         @media (max-width: 768px) {
-            .nav-wrapper { top: 10px; }
-            .page-header { text-align: center; }
-            .page-header p { margin: 0 auto; }
-            .news-filters { justify-content: flex-start; }
+            .nav-wrapper { 
+                top: 10px; 
+            }
+            .page-header { 
+                text-align: center; 
+            }
+            .page-header p { 
+                margin: 0 auto; 
+            }
+            .news-filters { 
+                justify-content: flex-start; 
+            }
         }
     </style>
 </head>
