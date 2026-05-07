@@ -22,10 +22,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 const userRoutes = require('./routes/users');
 const cursosRoutes = require('./routes/cursos');
 const adminRoutes = require('./routes/admin');
+const newsRoutes = require('./routes/news');
 
 app.use('/api/users', userRoutes);
 app.use('/api/cursos', cursosRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/news', newsRoutes);
 
 // TEST
 app.get('/api/test', (req, res) => {

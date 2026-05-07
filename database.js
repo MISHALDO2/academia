@@ -2,9 +2,9 @@ const sqlite3 = require('sqlite3').verbose();
 
 const db = new sqlite3.Database('./database.sqlite', (err) => {
   if (err) {
-    console.error("Error al conectar con la base de datos", err);
+    console.error('Error al conectar la base de datos', err.message);
   } else {
-    console.log("Base de datos conectada");
+    console.log('Base de datos conectada');
   }
 });
 
@@ -12,8 +12,7 @@ const db = new sqlite3.Database('./database.sqlite', (err) => {
 db.run(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT,
-    email TEXT,
+    email TEXT UNIQUE,
     password TEXT,
     role TEXT DEFAULT 'user'
   )
@@ -23,34 +22,31 @@ db.run(`
 db.run(`
   CREATE TABLE IF NOT EXISTS courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    titulo TEXT,
-    descripcion TEXT,
+    titulo TEXT NOT NULL,
+    descripcion TEXT NOT NULL,
     imagen TEXT
   )
 `);
-db.run(`
-  INSERT INTO courses (titulo, descripcion, imagen)
-  SELECT 'Curso JavaScript', 'Aprende JavaScript desde cero', 'https://via.placeholder.com/150'
-  WHERE NOT EXISTS (SELECT 1 FROM courses WHERE titulo = 'Curso JavaScript')
-`);
 
-db.run(`
-  INSERT INTO courses (titulo, descripcion, imagen)
-  SELECT 'Curso HTML', 'Domina HTML', 'https://via.placeholder.com/150'
-  WHERE NOT EXISTS (SELECT 1 FROM courses WHERE titulo = 'Curso HTML')
-`);
-
-db.run(`
-  INSERT INTO courses (titulo, descripcion, imagen)
-  SELECT 'Curso CSS', 'Aprende CSS moderno', 'https://via.placeholder.com/150'
-  WHERE NOT EXISTS (SELECT 1 FROM courses WHERE titulo = 'Curso CSS')
-`);
-
+// TABLA RELACIÓN USERS - COURSES
 db.run(`
   CREATE TABLE IF NOT EXISTS user_courses (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER,
-    course_id INTEGER
+    course_id INTEGER,
+    FOREIGN KEY(user_id) REFERENCES users(id),
+    FOREIGN KEY(course_id) REFERENCES courses(id)
   )
 `);
+
+// TABLA NEWS
+db.run(`
+  CREATE TABLE IF NOT EXISTS news (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    titulo TEXT NOT NULL,
+    contenido TEXT NOT NULL,
+    fecha TEXT DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
 module.exports = db;

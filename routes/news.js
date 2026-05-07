@@ -1,0 +1,102 @@
+const express = require('express');
+const router = express.Router();
+const db = require('../database');
+const adminMiddleware = require('./middlewares/admin');
+
+// OBTENER NOTICIAS
+router.get('/', (req, res) => {
+
+  const query = `
+    SELECT * FROM news
+    ORDER BY fecha DESC
+  `;
+
+  db.all(query, [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener noticias" });
+    }
+
+    res.json(rows);
+  });
+
+});
+
+// CREAR NOTICIA
+router.post('/', adminMiddleware, (req, res) => {
+
+  const { titulo, contenido } = req.body;
+
+  if (!titulo || !contenido) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  const query = `
+    INSERT INTO news (titulo, contenido)
+    VALUES (?, ?)
+  `;
+
+  db.run(query, [titulo, contenido], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al crear noticia" });
+    }
+
+    res.json({
+      mensaje: "Noticia creada",
+      id: this.lastID
+    });
+  });
+
+});
+
+// EDITAR NOTICIA
+router.put('/:id', adminMiddleware, (req, res) => {
+
+  const { id } = req.params;
+  const { titulo, contenido } = req.body;
+
+  if (!titulo || !contenido) {
+    return res.status(400).json({ error: "Faltan datos" });
+  }
+
+  const query = `
+    UPDATE news
+    SET titulo = ?, contenido = ?
+    WHERE id = ?
+  `;
+
+  db.run(query, [titulo, contenido, id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al actualizar noticia" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Noticia no encontrada" });
+    }
+
+    res.json({ mensaje: "Noticia actualizada" });
+  });
+
+});
+
+// ELIMINAR NOTICIA
+router.delete('/:id', adminMiddleware, (req, res) => {
+
+  const { id } = req.params;
+
+  const query = `DELETE FROM news WHERE id = ?`;
+
+  db.run(query, [id], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "Error al eliminar noticia" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "Noticia no encontrada" });
+    }
+
+    res.json({ mensaje: "Noticia eliminada" });
+  });
+
+});
+
+module.exports = router;
