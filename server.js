@@ -17,6 +17,7 @@ app.use(session({
 
 // SERVIR FRONTEND
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('.'));
 
 // ROUTES
 const userRoutes = require('./routes/users');
@@ -30,6 +31,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/news', newsRoutes);
 
 // TEST
+
 app.get('/api/test', (req, res) => {
   res.json({ mensaje: "Servidor funcionando" });
 });
