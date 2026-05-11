@@ -139,34 +139,29 @@ router.get('/my-courses', (req, res) => {
 // TODOS LOS USUARIOS CON SUS CURSOS
 router.get('/with-courses', (req, res) => {
   const query = `
-    SELECT users.id as user_id, users.email, courses.id as course_id, courses.titulo
+    SELECT users.id as user_id, users.email, users.role, users.name, courses.id as course_id, courses.titulo
     FROM users
     LEFT JOIN user_courses ON users.id = user_courses.user_id
     LEFT JOIN courses ON courses.id = user_courses.course_id
   `;
 
   db.all(query, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: "Error al obtener datos" });
-
-    const result = {};
-
+    if (err) return res.status(500).json({ error: "Error" });
+    const result = {};    
     rows.forEach(row => {
       if (!result[row.user_id]) {
         result[row.user_id] = {
           id: row.user_id,
           email: row.email,
+          role: row.role,
+          name: row.name,
           courses: []
         };
       }
-
       if (row.course_id) {
-        result[row.user_id].courses.push({
-          id: row.course_id,
-          titulo: row.titulo
-        });
+        result[row.user_id].courses.push({ id: row.course_id, titulo: row.titulo });
       }
     });
-
     res.json(Object.values(result));
   });
 });
