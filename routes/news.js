@@ -3,7 +3,7 @@ const router = express.Router();
 const db = require('../database');
 const adminMiddleware = require('./middlewares/admin');
 
-// OBTENER NOTICIAS
+// OBTENER TODAS LAS NOTICIAS
 router.get('/', (req, res) => {
 
   const query = `
@@ -17,6 +17,30 @@ router.get('/', (req, res) => {
     }
 
     res.json(rows);
+  });
+
+});
+
+// OBTENER UNA NOTICIA POR ID
+router.get('/:id', (req, res) => {
+
+  const { id } = req.params;
+
+  const query = `
+    SELECT * FROM news
+    WHERE id = ?
+  `;
+
+  db.get(query, [id], (err, row) => {
+    if (err) {
+      return res.status(500).json({ error: "Error al obtener noticia" });
+    }
+
+    if (!row) {
+      return res.status(404).json({ error: "Noticia no encontrada" });
+    }
+
+    res.json(row);
   });
 
 });
