@@ -3,20 +3,46 @@ const router = express.Router();
 const db = require('../database');
 const adminMiddleware = require('./middlewares/admin');
 
-// OBTENER TODAS LAS NOTICIAS
+// OBTENER TODAS LAS NOTICIAS CON PAGINACIÓN
 router.get('/', (req, res) => {
 
-  const query = `
-    SELECT * FROM news
-    ORDER BY fecha DESC
-  `;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 5;
+  const offset = (page - 1) * limit;
 
-  db.all(query, [], (err, rows) => {
+  const countQuery = `SELECT COUNT(*) as total FROM news`;
+
+  db.get(countQuery, [], (err, countResult) => {
+
     if (err) {
-      return res.status(500).json({ error: "Error al obtener noticias" });
+      return res.status(500).json({ error: "Error al contar noticias" });
     }
 
-    res.json(rows);
+    const total = countResult.total;
+    const totalPages = Math.ceil(total / limit);
+
+    const query = `
+      SELECT * FROM news
+      ORDER BY fecha DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    db.all(query, [limit, offset], (err, rows) => {
+
+      if (err) {
+        return res.status(500).json({ error: "Error al obtener noticias" });
+      }
+
+      res.json({
+        page,
+        limit,
+        total,
+        totalPages,
+        data: rows
+      });
+
+    });
+
   });
 
 });
@@ -32,6 +58,7 @@ router.get('/:id', (req, res) => {
   `;
 
   db.get(query, [id], (err, row) => {
+
     if (err) {
       return res.status(500).json({ error: "Error al obtener noticia" });
     }
@@ -41,6 +68,7 @@ router.get('/:id', (req, res) => {
     }
 
     res.json(row);
+
   });
 
 });
@@ -60,6 +88,7 @@ router.post('/', adminMiddleware, (req, res) => {
   `;
 
   db.run(query, [titulo, contenido], function (err) {
+
     if (err) {
       return res.status(500).json({ error: "Error al crear noticia" });
     }
@@ -68,6 +97,7 @@ router.post('/', adminMiddleware, (req, res) => {
       mensaje: "Noticia creada",
       id: this.lastID
     });
+
   });
 
 });
@@ -89,6 +119,7 @@ router.put('/:id', adminMiddleware, (req, res) => {
   `;
 
   db.run(query, [titulo, contenido, id], function (err) {
+
     if (err) {
       return res.status(500).json({ error: "Error al actualizar noticia" });
     }
@@ -98,6 +129,7 @@ router.put('/:id', adminMiddleware, (req, res) => {
     }
 
     res.json({ mensaje: "Noticia actualizada" });
+
   });
 
 });
@@ -110,6 +142,7 @@ router.delete('/:id', adminMiddleware, (req, res) => {
   const query = `DELETE FROM news WHERE id = ?`;
 
   db.run(query, [id], function (err) {
+
     if (err) {
       return res.status(500).json({ error: "Error al eliminar noticia" });
     }
@@ -119,6 +152,7 @@ router.delete('/:id', adminMiddleware, (req, res) => {
     }
 
     res.json({ mensaje: "Noticia eliminada" });
+
   });
 
 });
