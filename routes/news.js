@@ -81,13 +81,10 @@ router.post('/', adminMiddleware, (req, res) => {
   if (!titulo || !contenido || !tipo) {
     return res.status(400).json({ error: "Faltan datos" });
   }
-
   const query = `
     INSERT INTO news (titulo, contenido, tipo, important)
     VALUES (?, ?, ?, ?)
   `;
-
-  db.run(query, [titulo, contenido], function (err) {
 
   db.run(query, [titulo, contenido, tipo, important], function (err) {
     if (err) {
