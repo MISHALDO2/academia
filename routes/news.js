@@ -48,18 +48,18 @@ router.get('/:id', (req, res) => {
 // CREAR NOTICIA
 router.post('/', adminMiddleware, (req, res) => {
 
-  const { titulo, contenido } = req.body;
+  const { titulo, contenido, tipo, important } = req.body;
 
-  if (!titulo || !contenido) {
+  if (!titulo || !contenido || !tipo) {
     return res.status(400).json({ error: "Faltan datos" });
   }
 
   const query = `
-    INSERT INTO news (titulo, contenido)
-    VALUES (?, ?)
+    INSERT INTO news (titulo, contenido, tipo, important)
+    VALUES (?, ?, ?, ?)
   `;
 
-  db.run(query, [titulo, contenido], function (err) {
+  db.run(query, [titulo, contenido, tipo, important], function (err) {
     if (err) {
       return res.status(500).json({ error: "Error al crear noticia" });
     }
