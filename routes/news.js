@@ -3,23 +3,26 @@ const router = express.Router();
 const db = require('../database');
 const adminMiddleware = require('./middlewares/admin');
 
-// OBTENER TODAS LAS NOTICIAS CON PAGINACIÓN Y BÚSQUEDA
+// OBTENER TODAS LAS NOTICIAS CON PAGINACIÓN, BÚSQUEDA Y FILTRO
 router.get('/', (req, res) => {
 
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 5;
   const search = req.query.search || "";
+  const tipo = req.query.tipo || "";
   const offset = (page - 1) * limit;
 
   const searchTerm = `%${search}%`;
+  const tipoTerm = `%${tipo}%`;
 
   const countQuery = `
     SELECT COUNT(*) as total
     FROM news
-    WHERE titulo LIKE ? OR contenido LIKE ?
+    WHERE (titulo LIKE ? OR contenido LIKE ?)
+    AND tipo LIKE ?
   `;
 
-  db.get(countQuery, [searchTerm, searchTerm], (err, countResult) => {
+  db.get(countQuery, [searchTerm, searchTerm, tipoTerm], (err, countResult) => {
 
     if (err) {
       return res.status(500).json({ error: "Error al contar noticias" });
@@ -30,12 +33,13 @@ router.get('/', (req, res) => {
 
     const query = `
       SELECT * FROM news
-      WHERE titulo LIKE ? OR contenido LIKE ?
+      WHERE (titulo LIKE ? OR contenido LIKE ?)
+      AND tipo LIKE ?
       ORDER BY fecha DESC
       LIMIT ? OFFSET ?
     `;
 
-    db.all(query, [searchTerm, searchTerm, limit, offset], (err, rows) => {
+    db.all(query, [searchTerm, searchTerm, tipoTerm, limit, offset], (err, rows) => {
 
       if (err) {
         return res.status(500).json({ error: "Error al obtener noticias" });
@@ -47,6 +51,7 @@ router.get('/', (req, res) => {
         total,
         totalPages,
         search,
+        tipo,
         data: rows
       });
 
@@ -85,18 +90,18 @@ router.get('/:id', (req, res) => {
 // CREAR NOTICIA
 router.post('/', adminMiddleware, (req, res) => {
 
-  const { titulo, contenido } = req.body;
+  const { titulo, contenido, tipo } = req.body;
 
   if (!titulo || !contenido) {
     return res.status(400).json({ error: "Faltan datos" });
   }
 
   const query = `
-    INSERT INTO news (titulo, contenido)
-    VALUES (?, ?)
+    INSERT INTO news (titulo, contenido, tipo)
+    VALUES (?, ?, ?)
   `;
 
-  db.run(query, [titulo, contenido], function (err) {
+  db.run(query, [titulo, contenido, tipo || 'general'], function (err) {
 
     if (err) {
       return res.status(500).json({ error: "Error al crear noticia" });
@@ -115,7 +120,7 @@ router.post('/', adminMiddleware, (req, res) => {
 router.put('/:id', adminMiddleware, (req, res) => {
 
   const { id } = req.params;
-  const { titulo, contenido } = req.body;
+  const { titulo, contenido, tipo } = req.body;
 
   if (!titulo || !contenido) {
     return res.status(400).json({ error: "Faltan datos" });
@@ -123,11 +128,11 @@ router.put('/:id', adminMiddleware, (req, res) => {
 
   const query = `
     UPDATE news
-    SET titulo = ?, contenido = ?
+    SET titulo = ?, contenido = ?, tipo = ?
     WHERE id = ?
   `;
 
-  db.run(query, [titulo, contenido, id], function (err) {
+  db.run(query, [titulo, contenido, tipo || 'general', id], function (err) {
 
     if (err) {
       return res.status(500).json({ error: "Error al actualizar noticia" });

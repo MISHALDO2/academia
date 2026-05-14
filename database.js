@@ -45,6 +45,7 @@ db.run(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     titulo TEXT NOT NULL,
     contenido TEXT NOT NULL,
+    tipo TEXT DEFAULT 'general',
     fecha TEXT DEFAULT CURRENT_TIMESTAMP
   )
 `);
